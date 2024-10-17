@@ -16,7 +16,7 @@
             color: #333;
         }
         .container {
-           
+            max-width: 1000px;
             margin: 0 auto;
             background-color: #fff;
             padding: 30px;
@@ -171,45 +171,67 @@
     <script>
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        document.getElementById('name').addEventListener('input', function() {
-            document.getElementById('recipientName').textContent = this.value || "Recipient's Name";
-        });
+document.getElementById('name').addEventListener('input', function() {
+    document.getElementById('recipientName').textContent = this.value || "Recipient's Name";
+});
 
-        document.getElementById('courseName').addEventListener('input', function() {
-            document.getElementById('courseNameDisplay').textContent = this.value || "Course Name";
-        });
+document.getElementById('courseName').addEventListener('input', function() {
+    document.getElementById('courseNameDisplay').textContent = this.value || "Course Name";
+});
 
-        // document.getElementById('instructorName').addEventListener('input', function() {
-        //     document.getElementById('instructorNameDisplay').textContent = this.value || "Instructor Name";
-        // });
-
-        document.getElementById('signature').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('signatureImage');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function generateCertificate() {
-            const certificateDiv = document.getElementById('certificatePreview');
-            
-            html2canvas(certificateDiv, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'certificate.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
+document.getElementById('signature').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('signatureImage');
+            img.src = e.target.result;
+            img.style.display = 'block';
         }
+        reader.readAsDataURL(file);
+    }
+});
+
+function generateCertificate() {
+    const certificateDiv = document.getElementById('certificatePreview');
+    const recipientName = document.getElementById('name').value || "Recipient's Name";
+    
+    html2canvas(certificateDiv, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `${recipientName.replace(/\s+/g, '_')}_certificate.png`; // Use recipient's name in filename
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+}
+
+// Function to download as PDF
+document.getElementById('downloadBtn').addEventListener('click', function() {
+    const certificate = document.querySelector('.certificate');
+    const recipientName = document.getElementById('name').value || "Recipient's Name";
+
+    html2canvas(certificate, {
+        scale: 2 // Increase scale for higher resolution
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4'); // A4 size page of PDF
+
+        // Set desired dimensions for the certificate in mm
+        const certWidth = 210; // Width of A4 in mm
+        const certHeight = 297; // Height of A4 in mm
+
+        // Calculate image dimensions for A4 size
+        const imgWidth = certWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Add image to PDF with specified dimensions
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`${recipientName.replace(/\s+/g, '_')}_certificate.pdf`); // Download the PDF with recipient's name
+    });
+});
     </script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </body>
