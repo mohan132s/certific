@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Certificate Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap');
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .container {
+           
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #certificatePreview {
+            margin-top: 30px;
+            border: 3px solid #f1c40f;
+            padding: 40px;
+            text-align: center;
+            background-color: #fff;
+            background-image: url('https://bpuoztdspvvfyoeirznh.supabase.co/storage/v1/object/public/images/certificate-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #certificatePreview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 1;
+        }
+        #certificatePreview > * {
+            position: relative;
+            z-index: 2;
+        }
+        .certificate-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-family: 'Playfair Display', serif;
+        }
+        .recipient-name {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 30px 0;
+            color: #e74c3c;
+            text-transform: uppercase;
+        }
+        .course-name {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .signature-image {
+            max-width: 200px;
+            max-height: 100px;
+            margin: 20px auto;
+        }
+        .instructor-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+            color: #34495e;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .certificate-title {
+                font-size: 28px;
+            }
+            .recipient-name {
+                font-size: 36px;
+            }
+            .course-name {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enhanced Certificate Generator</h1>
+        <div class="form-group">
+            <label for="name">Recipient's Full Name:</label>
+            <input type="text" id="name" placeholder="Enter recipient's full name">
+        </div>
+        <div class="form-group">
+            <label for="courseName">Course Name:</label>
+            <input type="text" id="courseName" placeholder="Enter course name">
+        </div>
+        <!-- <div class="form-group">
+            <label for="instructorName">Instructor Name:</label>
+            <input type="text" id="instructorName" placeholder="Enter instructor's name">
+        </div> -->
+        <div class="form-group">
+            <label for="signature">Upload Signature:</label>
+            <input type="file" id="signature" accept="image/*">
+        </div>
+        <button onclick="generateCertificate()">Generate and Download Certificate</button>
+
+        <div id="certificatePreview">
+            <div class="certificate-title">Certificate of Completion</div>
+            <p>This is to certify that</p>
+            <div class="recipient-name" id="recipientName">Recipient's Name</div>
+            <p>has successfully completed the course</p>
+            <div class="course-name" id="courseNameDisplay">Course Name</div>
+            <p>on <span id="currentDate"></span></p>
+            <img id="signatureImage" class="signature-image" src="" alt="Signature" style="display: none;">
+            <p>Course Instructor</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        document.getElementById('name').addEventListener('input', function() {
+            document.getElementById('recipientName').textContent = this.value || "Recipient's Name";
+        });
+
+        document.getElementById('courseName').addEventListener('input', function() {
+            document.getElementById('courseNameDisplay').textContent = this.value || "Course Name";
+        });
+
+        // document.getElementById('instructorName').addEventListener('input', function() {
+        //     document.getElementById('instructorNameDisplay').textContent = this.value || "Instructor Name";
+        // });
+
+        document.getElementById('signature').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('signatureImage');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function generateCertificate() {
+            const certificateDiv = document.getElementById('certificatePreview');
+            
+            html2canvas(certificateDiv, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'certificate.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</body>
+</html>
